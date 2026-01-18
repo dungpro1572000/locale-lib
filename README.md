@@ -14,7 +14,7 @@ A Jetpack Compose library for handling language/locale switching in Android apps
 ### Step 1: Get JitPack Auth Token
 
 1. Go to https://jitpack.io
-2. Sign in with GitHub account: **dungpro1572k**
+2. Sign in with GitHub account: **dungpro1572000**
 3. Go to https://jitpack.io/private#auth
 4. Copy your Auth Token
 
@@ -53,7 +53,7 @@ Add to your `app/build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.dungpro1572k:android-locale:1.0.0")
+    implementation("com.github.dungpro1572000:locale-lib:1.0.0")
 }
 ```
 
@@ -61,7 +61,7 @@ dependencies {
 
 ## GitHub Credentials (for reference only)
 
-- Username: dungpro1572k
+- Username: dungpro1572000
 - Password: dung1572000
 
 ---
@@ -104,4 +104,4 @@ LanguageSelectionScreen(
 
 ## Author
 
-dungpro1572k
+dungpro1572000

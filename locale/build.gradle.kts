@@ -46,8 +46,8 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])
-                groupId = "com.github.dungpro1572k"
-                artifactId = "android-locale"
+                groupId = "com.github.dungpro1572000"
+                artifactId = "locale-lib"
                 version = "1.0.0"
             }
         }
