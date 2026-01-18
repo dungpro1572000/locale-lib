@@ -9,24 +9,9 @@ A Jetpack Compose library for handling language/locale switching in Android apps
 - Support for multiple languages (EN, VI, KO, JA, ZH, TH, FIL, NL, FR, DE, ES, PT, ES-MX)
 - Persistent locale preferences
 
-## Installation (Private Repo)
+## Installation
 
-### Step 1: Get JitPack Auth Token
-
-1. Go to https://jitpack.io
-2. Sign in with GitHub account: **dungpro1572000**
-3. Go to https://jitpack.io/private#auth
-4. Copy your Auth Token
-
-### Step 2: Add Auth Token to gradle.properties
-
-Add to your project's `gradle.properties` (or `~/.gradle/gradle.properties` for global):
-
-```properties
-authToken=YOUR_JITPACK_AUTH_TOKEN
-```
-
-### Step 3: Add JitPack repository
+### Step 1: Add JitPack repository
 
 Add JitPack to your `settings.gradle.kts`:
 
@@ -36,18 +21,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-            credentials {
-                username = "authToken"
-                password = providers.gradleProperty("authToken").orNull ?: ""
-            }
-        }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 ```
 
-### Step 4: Add dependency
+### Step 2: Add dependency
 
 Add to your `app/build.gradle.kts`:
 
@@ -56,15 +35,6 @@ dependencies {
     implementation("com.github.dungpro1572000:locale-lib:1.0.0")
 }
 ```
-
----
-
-## GitHub Credentials (for reference only)
-
-- Username: dungpro1572000
-- Password: dung1572000
-
----
 
 ## Usage
 
