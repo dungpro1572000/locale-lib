@@ -2,6 +2,7 @@ package com.dungz.locale.manager
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.dungz.locale.R
@@ -33,19 +34,21 @@ class LocaleManager private constructor(context: Context) {
      * Apps can provide their own list via setAvailableLanguages().
      */
     private var _availableLanguages: List<LanguageItem> = listOf(
-        LanguageItem(R.string.language_vietnamese, 0, "vi"),
-        LanguageItem(R.string.language_korean, 0, "ko"),
-        LanguageItem(R.string.language_english, 0, "en"),
-        LanguageItem(R.string.language_japanese, 0, "ja"),
-        LanguageItem(R.string.language_chinese, 0, "zh"),
-        LanguageItem(R.string.language_thai, 0, "th"),
-        LanguageItem(R.string.language_filipino, 0, "fil"),
-        LanguageItem(R.string.language_dutch, 0, "nl"),
-        LanguageItem(R.string.language_french, 0, "fr"),
-        LanguageItem(R.string.language_german, 0, "de"),
-        LanguageItem(R.string.language_spanish, 0, "es"),
-        LanguageItem(R.string.language_portuguese, 0, "pt"),
-        LanguageItem(R.string.language_mexican, 0, "es-MX")
+        LanguageItem("en", R.string.language_english, R.drawable.img_flag_en),
+        LanguageItem("ko", R.string.language_korean, R.drawable.img_flag_ko),
+        LanguageItem("zh", R.string.language_chinese, R.drawable.img_flag_zh),
+        LanguageItem("fil", R.string.language_filipino, R.drawable.img_flag_fil),
+        LanguageItem("fr", R.string.language_french, R.drawable.img_flag_fr),
+        LanguageItem("de", R.string.language_german, R.drawable.img_flag_de),
+        LanguageItem("es", R.string.language_spanish, R.drawable.img_flag_es),
+        LanguageItem("nl", R.string.language_dutch, R.drawable.img_flag_nl),
+        LanguageItem("pt-PT", R.string.language_portuguese_pt, R.drawable.img_flag_pt_pt),
+        LanguageItem("pt-BR", R.string.language_portuguese_br, R.drawable.img_flag_pt_br),
+        LanguageItem("ru", R.string.language_russian, R.drawable.img_flag_ru),
+        LanguageItem("in", R.string.language_indonesian, R.drawable.img_flag_id),
+        LanguageItem("af", R.string.language_afrikaans, R.drawable.img_flag_af),
+        LanguageItem("bn", R.string.language_bengali, R.drawable.img_flag_bn),
+        LanguageItem("hi", R.string.language_hindi, R.drawable.img_flag_mr)
     )
     val availableLanguages: List<LanguageItem>
         get() = _availableLanguages

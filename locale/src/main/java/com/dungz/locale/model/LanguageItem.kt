@@ -11,7 +11,7 @@ import androidx.annotation.StringRes
  * @param code Language code (e.g., "en", "vi", "ja")
  */
 data class LanguageItem(
-    @StringRes val name: Int,
-    @DrawableRes val flag: Int,
-    val code: String
+    val code: String,
+    val nameResId: Int,
+    val flagResId: Int
 )

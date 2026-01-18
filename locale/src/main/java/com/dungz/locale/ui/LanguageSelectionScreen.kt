@@ -3,12 +3,14 @@ package com.dungz.locale.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,12 +34,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dungz.locale.R
+import com.dungz.locale.manager.LocaleManager
 import com.dungz.locale.model.LanguageItem
 import com.dungz.locale.provider.LocalLanguageCode
 import com.dungz.locale.provider.LocalLocaleManager
@@ -57,7 +68,12 @@ fun LanguageSelectionScreen(
     val currentLanguageCode = LocalLanguageCode.current
     val availableLanguages = localeManager.availableLanguages
 
-    var selectedLanguageCode by remember { mutableStateOf(currentLanguageCode) }
+    // Initially null = no selection, animation shows on first item
+    // Once user selects, animation disappears
+    var selectedLanguageCode by remember { mutableStateOf<String?>(null) }
+    
+    // Optimize: Load Lottie composition once at the screen level to avoid jerky scrolling
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_handpoint))
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -69,7 +85,8 @@ fun LanguageSelectionScreen(
             // Header
             LanguageSelectionHeader(
                 onSaveClick = {
-                    localeManager.setLocale(selectedLanguageCode)
+                    // Only save if user has made a selection
+                    selectedLanguageCode?.let { localeManager.setLocale(it) }
                     onBackClick()
                 }
             )
@@ -91,7 +108,10 @@ fun LanguageSelectionScreen(
                     LanguageListItem(
                         languageItem = languageItem,
                         isSelected = selectedLanguageCode == languageItem.code,
-                        onClick = { selectedLanguageCode = languageItem.code }
+                        onClick = { selectedLanguageCode = languageItem.code },
+                        composition = composition,
+                        // Show animation on first item only when no selection has been made
+                        showAnimation = index == 0 && selectedLanguageCode == null
                     )
 
                     // Divider between items (not after the last item)
@@ -151,6 +171,8 @@ private fun LanguageListItem(
     languageItem: LanguageItem,
     isSelected: Boolean,
     onClick: () -> Unit,
+    composition: LottieComposition?,
+    showAnimation: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -162,8 +184,8 @@ private fun LanguageListItem(
     ) {
         // Flag
         Image(
-            painter = painterResource(id = languageItem.flag),
-            contentDescription = stringResource(languageItem.name),
+            painter = painterResource(id = languageItem.flagResId),
+            contentDescription = stringResource(languageItem.nameResId),
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape),
@@ -174,20 +196,52 @@ private fun LanguageListItem(
 
         // Language name
         Text(
-            text = stringResource(languageItem.name),
+            text = stringResource(languageItem.nameResId),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f)
         )
 
-        // Radio button
-        RadioButton(
-            selected = isSelected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colorScheme.primary,
-                unselectedColor = MaterialTheme.colorScheme.outline
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(60.dp) // Increased size for the container
+        ) {
+            // Radio button
+            RadioButton(
+                selected = isSelected,
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colorScheme.primary,
+                    unselectedColor = MaterialTheme.colorScheme.outline
+                )
             )
-        )
+
+            // Lottie Hand Point Animation (only show on item 3 if not selected)
+            if (showAnimation && !isSelected) {
+                LottieAnimation(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
+                    modifier = Modifier
+                        .size(80.dp) // Optimized: Larger size as requested
+                        .offset(x = 16.dp, y = 8.dp) // Using offset for precise pointing
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LanguageSelectionScreenPreview() {
+    val context = LocalContext.current
+    val localeManager = remember { LocaleManager.getInstance(context) }
+    
+    MaterialTheme {
+        CompositionLocalProvider(
+            LocalLocaleManager provides localeManager,
+            LocalLanguageCode provides "en"
+        ) {
+            LanguageSelectionScreen(onBackClick = {})
+        }
     }
 }

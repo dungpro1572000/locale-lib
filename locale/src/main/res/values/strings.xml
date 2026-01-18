@@ -15,5 +15,12 @@
     <string name="language_german">Deutsch</string>
     <string name="language_spanish">Español</string>
     <string name="language_portuguese">Português</string>
+    <string name="language_portuguese_pt">Português (Portugal)</string>
+    <string name="language_portuguese_br">Português (Brasil)</string>
     <string name="language_mexican">Español (México)</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_indonesian">Bahasa Indonesia</string>
+    <string name="language_afrikaans">Afrikaans</string>
+    <string name="language_bengali">বাংলা</string>
+    <string name="language_hindi">हिन्दी</string>
 </resources>
