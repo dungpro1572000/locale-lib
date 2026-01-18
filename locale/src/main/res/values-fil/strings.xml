@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="locale_select_language">Pumili ng Wika</string>
+    <string name="locale_save">I-save</string>
+</resources>
