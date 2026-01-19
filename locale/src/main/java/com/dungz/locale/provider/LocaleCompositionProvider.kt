@@ -1,6 +1,8 @@
 package com.dungz.locale.provider
 
 import android.content.Context
+import android.os.Build
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -12,6 +14,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.dungz.locale.manager.LocaleManager
 import com.dungz.locale.model.LanguageItem
 import java.util.Locale
+
+private const val TAG = "LocaleCompositionProvider"
 
 /**
  * CompositionLocal for providing the current Locale throughout the composition tree.
@@ -38,12 +42,14 @@ val LocalLanguageCode = staticCompositionLocalOf<String> {
  * A composable wrapper that provides locale-aware context to its children.
  * Wrap your App composable with this to enable locale switching functionality.
  *
+ * IMPORTANT: Your Activity must extend AppCompatActivity for locale switching to work.
+ *
  * Usage:
  * ```kotlin
  * LocaleAwareComposable(
  *     availableLanguages = listOf(
- *         LanguageItem(R.string.english, R.drawable.flag_us, "en"),
- *         LanguageItem(R.string.vietnamese, R.drawable.flag_vn, "vi")
+ *         LanguageItem("en", R.string.english, R.drawable.flag_us),
+ *         LanguageItem("vi", R.string.vietnamese, R.drawable.flag_vn)
  *     )
  * ) {
  *     MyAppTheme {
@@ -63,6 +69,17 @@ fun LocaleAwareComposable(
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
 
+    // Get the current locale from configuration (this will trigger recomposition when locale changes)
+    val configurationLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        configuration.locales.get(0)
+    } else {
+        @Suppress("DEPRECATION")
+        configuration.locale
+    }
+
+    Log.d(TAG, "LocaleAwareComposable - Configuration locale: $configurationLocale")
+    Log.d(TAG, "LocaleAwareComposable - Configuration locales: ${if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) configuration.locales else "N/A"}")
+
     val localeManager = remember {
         LocaleManager.getInstance(context).also {
             it.setAvailableLanguages(availableLanguages)
@@ -72,10 +89,21 @@ fun LocaleAwareComposable(
     val currentLocale by localeManager.currentLocale.collectAsState()
     val currentLanguageCode by localeManager.currentLanguageCode.collectAsState()
 
+    Log.d(TAG, "LocaleAwareComposable - LocaleManager currentLocale: $currentLocale")
+    Log.d(TAG, "LocaleAwareComposable - LocaleManager currentLanguageCode: $currentLanguageCode")
+
+    // Use configuration locale as the actual locale to ensure UI updates properly
+    // The StateFlow will also update, but configuration is the source of truth for actual locale
+    val effectiveLocale = configurationLocale ?: currentLocale
+    val effectiveLanguageCode = configurationLocale?.language ?: currentLanguageCode
+
+    Log.d(TAG, "LocaleAwareComposable - Effective locale: $effectiveLocale")
+    Log.d(TAG, "LocaleAwareComposable - Effective languageCode: $effectiveLanguageCode")
+
     CompositionLocalProvider(
-        LocalAppLocale provides currentLocale,
+        LocalAppLocale provides effectiveLocale,
         LocalLocaleManager provides localeManager,
-        LocalLanguageCode provides currentLanguageCode
+        LocalLanguageCode provides effectiveLanguageCode
     ) {
         content()
     }

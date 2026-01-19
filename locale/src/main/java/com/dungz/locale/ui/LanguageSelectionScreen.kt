@@ -1,5 +1,6 @@
 package com.dungz.locale.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,26 +53,40 @@ import com.dungz.locale.model.LanguageItem
 import com.dungz.locale.provider.LocalLanguageCode
 import com.dungz.locale.provider.LocalLocaleManager
 
+private const val TAG = "LanguageSelection"
+
 /**
  * Language selection screen that displays available languages
  * and allows users to select their preferred language.
  *
- * @param onBackClick Callback when back/close is clicked
+ * @param onBackClick Callback when back/close is clicked (called after saving language)
+ * @param onLanguageChanged Optional callback when language is actually changed
  * @param modifier Modifier for the screen
  */
 @Composable
 fun LanguageSelectionScreen(
     onBackClick: () -> Unit,
+    onLanguageChanged: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val localeManager = LocalLocaleManager.current
     val currentLanguageCode = LocalLanguageCode.current
     val availableLanguages = localeManager.availableLanguages
 
-    // Initially null = no selection, animation shows on first item
-    // Once user selects, animation disappears
-    var selectedLanguageCode by remember { mutableStateOf<String?>(null) }
-    
+    Log.d(TAG, "LanguageSelectionScreen - Current language code from provider: $currentLanguageCode")
+    Log.d(TAG, "LanguageSelectionScreen - Current locale from manager: ${localeManager.getCurrentLocaleSync()}")
+    Log.d(TAG, "LanguageSelectionScreen - Available languages: ${availableLanguages.map { it.code }}")
+
+    // Initialize with current language code so user sees current selection
+    var selectedLanguageCode by remember(currentLanguageCode) {
+        mutableStateOf(currentLanguageCode)
+    }
+
+    // Track if user has made a new selection (different from current)
+    val hasNewSelection = selectedLanguageCode != currentLanguageCode
+
+    Log.d(TAG, "LanguageSelectionScreen - Selected language code: $selectedLanguageCode, hasNewSelection: $hasNewSelection")
+
     // Optimize: Load Lottie composition once at the screen level to avoid jerky scrolling
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_handpoint))
 
@@ -85,8 +100,19 @@ fun LanguageSelectionScreen(
             // Header
             LanguageSelectionHeader(
                 onSaveClick = {
-                    // Only save if user has made a selection
-                    selectedLanguageCode?.let { localeManager.setLocale(it) }
+                    Log.d(TAG, "Save clicked - selectedLanguageCode: $selectedLanguageCode, currentLanguageCode: $currentLanguageCode")
+
+                    // Save the selected language
+                    val newLanguageCode = selectedLanguageCode
+                    if (newLanguageCode != currentLanguageCode) {
+                        Log.d(TAG, "Language changed from $currentLanguageCode to $newLanguageCode")
+                        localeManager.setLocale(newLanguageCode)
+                        onLanguageChanged?.invoke(newLanguageCode)
+                    } else {
+                        Log.d(TAG, "No language change needed, staying with $currentLanguageCode")
+                    }
+
+                    // Navigate back
                     onBackClick()
                 }
             )
@@ -105,13 +131,17 @@ fun LanguageSelectionScreen(
                     items = availableLanguages,
                     key = { _, item -> item.code }
                 ) { index, languageItem ->
+                    val isSelected = selectedLanguageCode == languageItem.code
                     LanguageListItem(
                         languageItem = languageItem,
-                        isSelected = selectedLanguageCode == languageItem.code,
-                        onClick = { selectedLanguageCode = languageItem.code },
+                        isSelected = isSelected,
+                        onClick = {
+                            Log.d(TAG, "Language item clicked: ${languageItem.code}")
+                            selectedLanguageCode = languageItem.code
+                        },
                         composition = composition,
-                        // Show animation on first item only when no selection has been made
-                        showAnimation = index == 0 && selectedLanguageCode == null
+                        // Show animation on current language item only when no new selection has been made
+                        showAnimation = languageItem.code == currentLanguageCode && !hasNewSelection
                     )
 
                     // Divider between items (not after the last item)

@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 
+private const val TAG = "LocaleManager"
+
 /**
  * Manager class for handling application locale changes.
  * Uses StateFlow to notify observers about locale changes.
@@ -28,6 +30,14 @@ class LocaleManager private constructor(context: Context) {
 
     private val _currentLanguageCode = MutableStateFlow(getSavedLanguageCode())
     val currentLanguageCode: StateFlow<String> = _currentLanguageCode.asStateFlow()
+
+    init {
+        Log.d(TAG, "LocaleManager initialized")
+        Log.d(TAG, "Initial languageCode: ${_currentLanguageCode.value}")
+        Log.d(TAG, "Initial locale: ${_currentLocale.value}")
+        Log.d(TAG, "System default locale: ${Locale.getDefault()}")
+        Log.d(TAG, "AppCompatDelegate locales: ${AppCompatDelegate.getApplicationLocales()}")
+    }
 
     /**
      * Available languages for the application.
@@ -82,17 +92,24 @@ class LocaleManager private constructor(context: Context) {
      * @param languageCode The language code to switch to (e.g., "en", "vi", "ja")
      */
     fun setLocale(languageCode: String) {
+        Log.d(TAG, "setLocale called with languageCode: $languageCode")
+        Log.d(TAG, "Previous languageCode: ${_currentLanguageCode.value}, previous locale: ${_currentLocale.value}")
+
         // Save to preferences
         prefs.edit().putString(KEY_LANGUAGE_CODE, languageCode).apply()
+        Log.d(TAG, "Saved languageCode to SharedPreferences")
 
         // Update StateFlow values
         val newLocale = Locale(languageCode)
         _currentLocale.value = newLocale
         _currentLanguageCode.value = languageCode
+        Log.d(TAG, "Updated StateFlow - currentLocale: $newLocale, currentLanguageCode: $languageCode")
 
         // Apply locale change using AppCompat (doesn't destroy activity)
         val localeList = LocaleListCompat.forLanguageTags(languageCode)
+        Log.d(TAG, "Applying locale via AppCompatDelegate.setApplicationLocales: $localeList")
         AppCompatDelegate.setApplicationLocales(localeList)
+        Log.d(TAG, "AppCompatDelegate.setApplicationLocales completed")
     }
 
     /**
